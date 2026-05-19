@@ -1,40 +1,98 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const tiers = [
-  { max: 10,  monthly: 0,      yearly: 0      },
-  { max: 50,  monthly: 99000,  yearly: 79000  },
-  { max: 100, monthly: 199000, yearly: 159000 },
-  { max: 200, monthly: 399000, yearly: 319000 },
-]
-
 const plans = [
   {
-    name: 'Free',
+    name: 'Trial',
+    price: null,
+    priceLabel: 'Gratis',
+    priceSub: '14 hari akses penuh',
+    limit: 'Semua fitur terbuka',
     highlight: false,
-    limit: 'Hingga 10 karyawan',
-    features: ['Data Karyawan', 'Absensi & Kehadiran', 'Manajemen Cuti & Izin', 'Payroll Basic'],
-    back: 'Cocok untuk bisnis yang baru mulai. Tidak perlu kartu kredit, tidak ada batas waktu.',
-    cta: 'Mulai Gratis',
+    cta: 'Mulai Trial',
     href: 'https://wa.me/6285156585411',
+    back: 'Coba semua fitur gratis selama 14 hari. Tidak perlu kartu kredit.',
+    features: [
+      'Web & mobile app',
+      'GPS attendance',
+      'Leave management',
+      'Payroll basic',
+      'Semua fitur terbuka',
+    ],
   },
   {
-    name: 'Plus',
+    name: 'Growth',
+    price: 99000,
+    priceLabel: null,
+    priceSub: '/ bulan',
+    limit: 'Maks. 25 karyawan',
+    highlight: false,
+    cta: 'Pilih Growth',
+    href: 'https://wa.me/6285156585411',
+    back: 'Cocok untuk UMKM kecil yang butuh HRIS lengkap dengan harga terjangkau.',
+    features: [
+      'Mobile app included',
+      'GPS attendance',
+      'Leave management',
+      'Payroll basic',
+      'Export PDF & Excel',
+    ],
+  },
+  {
+    name: 'Business',
+    price: 249000,
+    priceLabel: null,
+    priceSub: '/ bulan',
+    limit: 'Maks. 75 karyawan',
     highlight: true,
-    limit: 'Hingga 200 karyawan',
-    features: ['Semua fitur Free', 'Komponen Gaji Dinamis', 'Laporan Advanced', 'Perhitungan Lembur & THR', 'Priority Support'],
-    back: 'Untuk UMKM yang sedang berkembang. Harga menyesuaikan jumlah karyawan kamu.',
-    cta: 'Pilih Plus',
+    cta: 'Pilih Business',
     href: 'https://wa.me/6285156585411',
+    back: 'Untuk UMKM yang berkembang. Approval flow, laporan advanced, dan overtime sudah termasuk.',
+    features: [
+      'Semua fitur Growth',
+      'Custom role',
+      'Approval flow',
+      'Advanced reporting',
+      'Overtime basic',
+      'Dashboard analytics',
+    ],
   },
   {
-    name: 'Pro',
+    name: 'Scale',
+    price: 499000,
+    priceLabel: null,
+    priceSub: '/ bulan',
+    limit: 'Maks. 200 karyawan',
     highlight: false,
+    cta: 'Pilih Scale',
+    href: 'https://wa.me/6285156585411',
+    back: 'Operasional lebih kompleks? Multi branch, WA notification, dan API siap untuk kamu.',
+    features: [
+      'Semua fitur Business',
+      'Multi branch',
+      'WA notification',
+      'API & Webhook',
+      'Audit log',
+      'Priority support',
+    ],
+  },
+  {
+    name: 'Enterprise',
+    price: null,
+    priceLabel: 'Custom',
+    priceSub: 'Hubungi kami',
     limit: 'Karyawan tidak terbatas',
-    features: ['Semua fitur Plus', 'Kustomisasi penuh', 'Dedicated support', 'SLA & kontrak resmi', 'Onboarding tim'],
-    back: 'Solusi enterprise untuk kebutuhan kompleks. Kami siap diskusi sesuai kebutuhan kamu.',
+    highlight: false,
     cta: 'Hubungi Kami',
     href: 'https://wa.me/6285156585411',
+    back: 'Kebutuhan khusus? Kami siap diskusi SLA, onboarding tim, dan kontrak resmi.',
+    features: [
+      'Semua fitur Scale',
+      'Kustomisasi penuh',
+      'Dedicated support',
+      'SLA & kontrak resmi',
+      'Onboarding tim',
+    ],
   },
 ]
 
@@ -46,61 +104,85 @@ function fmt(n) {
   }).format(n)
 }
 
-function getPlan(employees, isYearly) {
-  const tier = tiers.find((t) => employees <= t.max) ?? tiers[tiers.length - 1]
-  const price = isYearly ? tier.yearly : tier.monthly
-  return { price, isFree: price === 0 }
-}
-
-function FlipCard({ plan, isYearly, employees }) {
+function FlipCard({ plan, isYearly }) {
   const [flipped, setFlipped] = useState(false)
+  const hl = plan.highlight
 
   const getPrice = () => {
-    if (plan.name === 'Free') return 'Gratis'
-    if (plan.name === 'Pro') return 'Custom'
-    const { price, isFree } = getPlan(employees, isYearly)
-    return isFree ? 'Gratis' : fmt(price)
+    if (plan.priceLabel) return plan.priceLabel
+    return isYearly
+      ? fmt(Math.round(plan.price * 0.8))
+      : fmt(plan.price)
   }
 
   const getSub = () => {
-    if (plan.name === 'Free') return 'Selamanya'
-    if (plan.name === 'Pro') return 'Hubungi kami'
-    const { isFree } = getPlan(employees, isYearly)
-    if (isFree) return 'Selamanya'
+    if (plan.priceLabel) return plan.priceSub
     return isYearly ? '/ bulan · hemat 20%' : '/ bulan'
   }
 
-  const hl = plan.highlight
+  const cardBase = {
+    position: 'absolute',
+    inset: 0,
+    borderRadius: '1.5rem',
+    border: '1px solid',
+    display: 'flex',
+    flexDirection: 'column',
+    WebkitBackfaceVisibility: 'hidden',
+    backfaceVisibility: 'hidden',
+  }
 
   return (
     <div
-      className="relative cursor-pointer"
-      style={{ perspective: '1000px', minHeight: '420px' }}
+      style={{ perspective: '1000px', minHeight: '400px', position: 'relative', cursor: 'pointer' }}
       onMouseEnter={() => setFlipped(true)}
       onMouseLeave={() => setFlipped(false)}
     >
-      <motion.div
-        style={{ transformStyle: 'preserve-3d', position: 'relative', width: '100%', height: '100%' }}
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.5, ease: 'easeInOut' }}
-      >
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        minHeight: '400px',
+        transformStyle: 'preserve-3d',
+        WebkitTransformStyle: 'preserve-3d',
+        transition: 'transform 0.5s ease',
+        transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+      }}>
+
         {/* Front */}
-        <div
-          className={`absolute inset-0 rounded-3xl p-8 border flex flex-col ${
-            hl
-              ? 'bg-blue-600 border-blue-600 text-white shadow-2xl shadow-blue-200'
-              : 'bg-white border-gray-100'
-          }`}
-          style={{ backfaceVisibility: 'hidden' }}
-        >
+        <div style={{
+          ...cardBase,
+          padding: hl ? '2.5rem 1.75rem 1.75rem' : '1.75rem',
+          background: hl ? '#2563eb' : '#ffffff',
+          borderColor: hl ? '#2563eb' : '#f3f4f6',
+          boxShadow: hl ? '0 25px 50px -12px rgba(37,99,235,0.25)' : 'none',
+          transform: 'rotateY(0deg)',
+        }}>
           {hl && (
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-blue-600 text-xs font-medium px-4 py-1 rounded-full shadow">
+            <span style={{
+              position: 'absolute',
+              top: '-12px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: '#ffffff',
+              color: '#2563eb',
+              fontSize: '0.7rem',
+              fontWeight: 500,
+              padding: '3px 14px',
+              borderRadius: '9999px',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              whiteSpace: 'nowrap',
+            }}>
               Paling Populer
             </span>
           )}
 
-          <div className="mb-5">
-            <span className={`text-xs font-medium tracking-widest uppercase ${hl ? 'text-blue-200' : 'text-blue-500'}`}>
+          <div style={{ marginBottom: '1.25rem' }}>
+            <span style={{
+              fontSize: '0.7rem',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: hl ? '#bfdbfe' : '#3b82f6',
+            }}>
               {plan.name}
             </span>
 
@@ -111,75 +193,96 @@ function FlipCard({ plan, isYearly, employees }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 8 }}
                 transition={{ duration: 0.2 }}
-                className={`text-4xl font-bold mt-2 ${hl ? 'text-white' : 'text-gray-900'}`}
+                style={{
+                  fontSize: '2rem',
+                  fontWeight: 700,
+                  marginTop: '0.5rem',
+                  color: hl ? '#ffffff' : '#111827',
+                  lineHeight: 1.1,
+                }}
               >
                 {getPrice()}
               </motion.div>
             </AnimatePresence>
 
-            <p className={`text-xs mt-1 ${hl ? 'text-blue-200' : 'text-gray-400'}`}>{getSub()}</p>
-            <p className={`text-xs font-medium mt-1 ${hl ? 'text-blue-200' : 'text-gray-400'}`}>{plan.limit}</p>
+            <p style={{ fontSize: '0.75rem', marginTop: '4px', color: hl ? '#bfdbfe' : '#9ca3af' }}>
+              {getSub()}
+            </p>
+            <p style={{ fontSize: '0.75rem', fontWeight: 500, marginTop: '4px', color: hl ? '#bfdbfe' : '#9ca3af' }}>
+              {plan.limit}
+            </p>
           </div>
 
-          <ul className="space-y-2 flex-1">
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {plan.features.map((f) => (
-              <li key={f} className="flex items-start gap-2 text-sm">
-                <span className={`mt-0.5 ${hl ? 'text-blue-200' : 'text-blue-500'}`}>✓</span>
-                {/* fix utama: pakai text-white di highlight, bukan text-blue-50 */}
-                <span className={hl ? 'text-white' : 'text-gray-600'}>{f}</span>
+              <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.8rem' }}>
+                <span style={{ color: hl ? '#bfdbfe' : '#3b82f6', flexShrink: 0, marginTop: '2px' }}>✓</span>
+                <span style={{ color: hl ? '#ffffff' : '#4b5563' }}>{f}</span>
               </li>
             ))}
           </ul>
 
-          <p className={`text-xs mt-4 ${hl ? 'text-white/60' : 'text-gray-400'}`}>
+          <p style={{ fontSize: '0.7rem', marginTop: '1rem', color: hl ? 'rgba(255,255,255,0.45)' : '#d1d5db' }}>
             Hover untuk detail →
           </p>
         </div>
 
         {/* Back */}
-        <div
-          className={`absolute inset-0 rounded-3xl p-8 border flex flex-col justify-between ${
-            hl ? 'bg-blue-700 border-blue-700' : 'bg-blue-50 border-blue-100'
-          }`}
-          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-        >
+        <div style={{
+          ...cardBase,
+          padding: '1.75rem',
+          background: hl ? '#1d4ed8' : '#eff6ff',
+          borderColor: hl ? '#1d4ed8' : '#dbeafe',
+          justifyContent: 'space-between',
+          transform: 'rotateY(180deg)',
+        }}>
           <div>
-            <span className={`text-xs font-medium tracking-widest uppercase ${hl ? 'text-blue-200' : 'text-blue-500'}`}>
+            <span style={{
+              fontSize: '0.7rem',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: hl ? '#bfdbfe' : '#3b82f6',
+            }}>
               {plan.name}
             </span>
-            <p className={`mt-4 text-sm leading-relaxed ${hl ? 'text-white' : 'text-gray-600'}`}>
+            <p style={{ marginTop: '1rem', fontSize: '0.875rem', lineHeight: 1.7, color: hl ? '#ffffff' : '#4b5563' }}>
               {plan.back}
             </p>
           </div>
-
           <a
             href={plan.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`block text-center text-sm font-medium py-3 rounded-full transition-all duration-300 mt-6 ${
-              hl
-                ? 'bg-white text-blue-600 hover:bg-blue-50'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              padding: '12px',
+              borderRadius: '9999px',
+              marginTop: '1.5rem',
+              textDecoration: 'none',
+              background: hl ? '#ffffff' : '#2563eb',
+              color: hl ? '#2563eb' : '#ffffff',
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {plan.cta}
           </a>
         </div>
-      </motion.div>
+
+      </div>
     </div>
   )
 }
 
 export default function Pricing() {
   const [isYearly, setIsYearly] = useState(false)
-  const [employees, setEmployees] = useState(10)
-
-  const { price, isFree } = getPlan(employees, isYearly)
 
   return (
-    <section id="harga" className="py-28 px-8 bg-gray-50">
-      <div className="max-w-5xl mx-auto">
+    <section id="harga" className="py-28 px-6 bg-gray-50">
+      <div className="max-w-6xl mx-auto">
 
         {/* Heading */}
         <motion.div
@@ -191,19 +294,18 @@ export default function Pricing() {
         >
           <span className="text-xs font-medium tracking-widest text-blue-500 uppercase">Harga</span>
           <h2 className="text-4xl font-semibold text-gray-900 mt-3">Transparan, tanpa biaya tersembunyi</h2>
-          <p className="text-gray-400 mt-3">Mulai gratis, upgrade kapan saja sesuai kebutuhan</p>
+          <p className="text-gray-400 mt-3">Coba gratis 14 hari, upgrade kapan saja sesuai kebutuhan</p>
         </motion.div>
 
-        {/* Toggle bulanan / tahunan */}
+        {/* Toggle */}
         <motion.div
-          className="flex items-center justify-center gap-3 mb-8"
+          className="flex items-center justify-center gap-3 mb-12"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
         >
           <span className={`text-sm ${!isYearly ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>Bulanan</span>
-
           <button
             onClick={() => setIsYearly((v) => !v)}
             className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${isYearly ? 'bg-blue-600' : 'bg-gray-200'}`}
@@ -215,9 +317,7 @@ export default function Pricing() {
               transition={{ duration: 0.2 }}
             />
           </button>
-
           <span className={`text-sm ${isYearly ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>Tahunan</span>
-
           <AnimatePresence>
             {isYearly && (
               <motion.span
@@ -232,69 +332,37 @@ export default function Pricing() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Slider kalkulator */}
-        <motion.div
-          className="bg-white rounded-2xl border border-gray-100 p-6 mb-10 max-w-lg mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-gray-500">Berapa jumlah karyawan kamu?</span>
-            <span className="text-sm font-semibold text-blue-600">{employees} orang</span>
-          </div>
-          <input
-            type="range"
-            min={1}
-            max={200}
-            step={1}
-            value={employees}
-            onChange={(e) => setEmployees(Number(e.target.value))}
-            className="w-full accent-blue-600 mb-4"
-          />
-          <div className="flex items-baseline justify-between bg-blue-50 rounded-xl px-5 py-3">
-            <span className="text-sm text-gray-500">Estimasi biaya HRIS</span>
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={`${price}-${isYearly}`}
-                className="text-xl font-bold text-blue-600"
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 6 }}
-                transition={{ duration: 0.2 }}
-              >
-                {isFree ? 'Gratis' : `${fmt(price)}/bln`}
-              </motion.span>
-            </AnimatePresence>
-          </div>
-        </motion.div>
-
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 items-start">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.5, delay: i * 0.15 }}
-              className={plan.highlight ? 'md:scale-105' : ''}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              style={plan.highlight ? { transform: 'scale(1.04)', zIndex: 10 } : {}}
             >
-              <FlipCard plan={plan} isYearly={isYearly} employees={employees} />
+              <FlipCard plan={plan} isYearly={isYearly} />
             </motion.div>
           ))}
         </div>
 
-        <motion.p
-          className="text-center text-xs text-gray-400 mt-8"
+        {/* Trial note */}
+        <motion.div
+          className="mt-12 text-center"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
         >
-          * Saat langganan berakhir, data tetap dapat diakses dalam mode read-only.
-        </motion.p>
+          <p className="text-sm text-gray-500">
+            Mulai dengan <span className="font-medium text-gray-700">trial 14 hari gratis</span> — tidak perlu kartu kredit.
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            * Setelah trial berakhir, akun beralih ke mode read-only. Data tetap aman.
+          </p>
+        </motion.div>
 
       </div>
     </section>

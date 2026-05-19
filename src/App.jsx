@@ -2,6 +2,7 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
 import Services from './components/Services'
+import Pricing from './components/Pricing'
 import Contact from './components/Contact'
 
 export default function App() {
@@ -11,9 +12,10 @@ export default function App() {
       <Hero />
       <About />
       <Services />
+      <Pricing />
       <Contact />
       <footer className="bg-gray-900 text-gray-500 text-center py-8 text-sm">
-        © 2025 <span className="text-white font-medium">Pram Agency</span> · Build Better System
+        © 2026 <span className="text-white font-medium">Pram Agency</span> · Build Better System
       </footer>
     </div>
   )

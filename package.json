@@ -10,8 +10,12 @@
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
+    "@tsparticles/react": "^4.0.4",
+    "@tsparticles/slim": "^4.0.4",
+    "framer-motion": "^12.39.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "tsparticles": "^4.0.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
